@@ -187,10 +187,7 @@
                     <textarea id="message" name="message" rows="5" required
                         placeholder="How can we help you?"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="attachment">Attach File (Optional)</label>
-                    <input type="file" id="attachment" name="attachment">
-                </div>
+
                 <button type="submit" class="btn btn-submit">Send Message</button>
             </form>
         </div>
@@ -262,16 +259,14 @@
                     const name = document.getElementById('name').value;
                     const email = document.getElementById('email').value;
                     const message = document.getElementById('message').value;
-                    const attachment = document.getElementById('attachment').value;
+
 
                     let recipient = 'newdeals@thekandelagroup.com';
                     if (currentType === 'info') {
                         recipient = 'info@thekandelagroup.com';
                     }
 
-                    if (attachment) {
-                        alert("Please note: Due to browser security, files cannot be automatically attached. Please attach your file manually in the email window that opens next.");
-                    }
+
 
                     const mailto = `mailto:${recipient}?subject=${currentType === 'business' ? 'Business Development' : 'Information'} Inquiry from ${encodeURIComponent(name)}&body=Name: ${encodeURIComponent(name)}%0AEmail: ${encodeURIComponent(email)}%0AMessage: ${encodeURIComponent(message)}`;
                     window.location.href = mailto;
