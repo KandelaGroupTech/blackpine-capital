@@ -350,3 +350,134 @@ p {
         padding: 0 15px;
     }
 }
+/* ========================================
+   Contact Form
+   ======================================== */
+.contact-form {
+    max-width: 600px;
+    margin: 3rem auto 0;
+    padding: 2.5rem;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #444;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #eee;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #fafafa;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #08ac9b;
+    background-color: #fff;
+    box-shadow: 0 0 0 4px rgba(8, 172, 155, 0.1);
+}
+
+.btn-submit {
+    width: 100%;
+    background-color: #222;
+    color: #fff;
+    border: none;
+    padding: 15px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.btn-submit:hover {
+    background-color: #08ac9b;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(8, 172, 155, 0.3);
+}
+
+/* Update contact section background to make the white form pop */
+.contact {
+    background-color: #f4f4f4;
+    padding: 80px 0;
+}
+
+.contact h2 {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.contact p {
+    text-align: center;
+}
+
+
+/* ========================================
+   Form Tabs & Attachments
+   ======================================== */
+.form-tabs {
+    display: flex;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #eee;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 15px;
+    background: none;
+    border: none;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px; /* Overlap border */
+}
+
+.tab-btn:hover {
+    color: #444;
+    background-color: #f9f9f9;
+}
+
+.tab-btn.active {
+    color: #08ac9b;
+    border-bottom-color: #08ac9b;
+}
+
+/* File Input Styling */
+input[type='file'] {
+    padding: 10px;
+    background-color: #f4f4f4;
+    border: 1px dashed #ccc;
+    cursor: pointer;
+}
+
+input[type='file']:hover {
+    background-color: #eee;
+    border-color: #aaa;
+}
+
