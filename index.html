@@ -48,6 +48,14 @@
             font-family: 'Montserrat', sans-serif;
         }
     </style>
+    </style>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            emailjs.init("xWr05zDzQQfwj_747");
+        })();
+    </script>
 </head>
 
 <body>
@@ -252,6 +260,12 @@
             if (contactForm) {
                 contactForm.addEventListener('submit', function (e) {
                     e.preventDefault();
+
+                    const btn = contactForm.querySelector('.btn-submit');
+                    const originalBtnText = btn.textContent;
+                    btn.textContent = 'Sending...';
+                    btn.disabled = true;
+
                     const name = document.getElementById('name').value;
                     const email = document.getElementById('email').value;
                     const message = document.getElementById('message').value;
@@ -262,13 +276,26 @@
                         recipient = 'info@thekandelagroup.com';
                     }
 
+                    const templateParams = {
+                        subject: `${currentType === 'business' ? 'Business Development' : 'Information'} Inquiry`,
+                        name: name,
+                        email: email,
+                        message: message,
+                        recipient: recipient
+                    };
 
-
-                    const mailto = `mailto:${recipient}?subject=${currentType === 'business' ? 'Business Development' : 'Information'} Inquiry from ${encodeURIComponent(name)}&body=Name: ${encodeURIComponent(name)}%0AEmail: ${encodeURIComponent(email)}%0AMessage: ${encodeURIComponent(message)}`;
-                    window.location.href = mailto;
-
-                    // Clear the form fields after sending
-                    contactForm.reset();
+                    emailjs.send('service_yljnb5p', 'template_85632da', templateParams)
+                        .then(function () {
+                            alert('Message Sent Successfully!');
+                            contactForm.reset();
+                            btn.textContent = originalBtnText;
+                            btn.disabled = false;
+                        }, function (error) {
+                            alert('Failed to send message. Please try again later.');
+                            console.log('FAILED...', error);
+                            btn.textContent = originalBtnText;
+                            btn.disabled = false;
+                        });
                 });
             }
         });
