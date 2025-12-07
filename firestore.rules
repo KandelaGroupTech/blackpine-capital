@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return exists(/databases/$(database)/documents/admins/$(request.auth.uid));
+    }
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Admins collection - only admins can read/write
+    match /admins/{adminId} {
+      allow read, write: if isAdmin();
+    }
+    
+    // Investors collection
+    match /investors/{investorId} {
+      // Admins can read/write all
+      allow read, write: if isAdmin();
+      // Investors can only read their own data
+      allow read: if isAuthenticated() && request.auth.uid == investorId;
+      // Investors can update their own lastLogin
+      allow update: if isAuthenticated() && request.auth.uid == investorId 
+                    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastLogin']);
+    }
+    
+    // Messages collection
+    match /messages/{messageId} {
+      // Admins can read/write all
+      allow read, write: if isAdmin();
+      // Investors can read messages sent to them or to all
+      allow read: if isAuthenticated() && 
+                  (resource.data.recipientId == request.auth.uid || 
+                   resource.data.recipientId == 'all');
+      // Investors can update readAt timestamp on their own messages
+      allow update: if isAuthenticated() && 
+                    (resource.data.recipientId == request.auth.uid || 
+                     resource.data.recipientId == 'all') &&
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readAt']);
+    }
+    
+    // Documents collection
+    match /documents/{documentId} {
+      // Admins can read/write all
+      allow read, write: if isAdmin();
+      // Investors can read documents shared with them or with all
+      allow read: if isAuthenticated() && 
+                  (resource.data.recipientId == request.auth.uid || 
+                   resource.data.recipientId == 'all');
+    }
+  }
+}

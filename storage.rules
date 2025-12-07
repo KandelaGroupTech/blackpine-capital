@@ -1,0 +1,25 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return firestore.exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+    
+    // Documents folder
+    match /documents/{documentId} {
+      // Only admins can upload/delete documents
+      allow write, delete: if request.auth != null && isAdmin();
+      
+      // Anyone authenticated can read documents
+      // (We rely on Firestore rules to control which documents users can see)
+      allow read: if request.auth != null;
+    }
+    
+    // Deny all other paths
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

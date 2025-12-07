@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Blackpine Capital</title>
+    <link rel="icon" href="Azalea.png" type="image/icon">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="investor-portal.css">
+    <link rel="stylesheet" href="admin-portal.css">
+</head>
+
+<body>
+    <div class="admin-container">
+        <div class="dashboard-header">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Blackpine Capital Investor Portal Management</p>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Sign Out</button>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalInvestors">0</div>
+                <div class="stat-label">Total Investors</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalMessages">0</div>
+                <div class="stat-label">Messages Sent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="totalDocuments">0</div>
+                <div class="stat-label">Documents Uploaded</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="admin-tabs">
+            <button class="tab-btn active" data-tab="investors">Manage Investors</button>
+            <button class="tab-btn" data-tab="messages">Send Messages</button>
+            <button class="tab-btn" data-tab="documents">Upload Documents</button>
+        </div>
+
+        <!-- Tab Content: Manage Investors -->
+        <div id="investors-tab" class="tab-content active">
+            <div class="admin-form">
+                <h3>Add New Investor</h3>
+                <form id="addInvestorForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="investorName">Investor Name</label>
+                            <input type="text" id="investorName" required placeholder="John Doe">
+                        </div>
+                        <div class="form-group">
+                            <label for="investorEmail">Email Address</label>
+                            <input type="email" id="investorEmail" required placeholder="investor@example.com">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="investorPassword">Temporary Password</label>
+                        <input type="text" id="investorPassword" required placeholder="Min. 6 characters" value="">
+                    </div>
+                    <button type="submit" class="btn" id="addInvestorBtn">Add Investor</button>
+                </form>
+            </div>
+
+            <div class="investor-list">
+                <h3>Current Investors</h3>
+                <div id="investorListContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading investors...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Content: Send Messages -->
+        <div id="messages-tab" class="tab-content">
+            <div class="admin-form">
+                <h3>Send Message to Investors</h3>
+                <form id="sendMessageForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="messageRecipient">Recipient</label>
+                            <select id="messageRecipient" required>
+                                <option value="all">All Investors</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="messageSubject">Subject</label>
+                            <input type="text" id="messageSubject" required placeholder="Message subject">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="messageBody">Message</label>
+                        <textarea id="messageBody" required placeholder="Type your message here..."></textarea>
+                    </div>
+                    <button type="submit" class="btn" id="sendMessageBtn">Send Message</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Tab Content: Upload Documents -->
+        <div id="documents-tab" class="tab-content">
+            <div class="admin-form">
+                <h3>Upload Document</h3>
+                <form id="uploadDocumentForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="documentRecipient">Share With</label>
+                            <select id="documentRecipient" required>
+                                <option value="all">All Investors</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="documentCategory">Category</label>
+                            <select id="documentCategory" required>
+                                <option value="tax-forms">Tax Forms</option>
+                                <option value="financial-statements">Financial Statements</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Select File</label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <div class="upload-icon">📄</div>
+                            <p>Click to select file or drag and drop</p>
+                            <p style="font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 10px;">PDF, Excel, Word
+                                documents supported</p>
+                            <input type="file" id="documentFile" accept=".pdf,.doc,.docx,.xls,.xlsx" required>
+                        </div>
+                        <div id="fileInfo" class="file-info" style="display: none;"></div>
+                    </div>
+
+                    <button type="submit" class="btn" id="uploadDocumentBtn">Upload Document</button>
+                    <div id="uploadProgress" style="display: none; margin-top: 15px;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                        </div>
+                        <p style="text-align: center; margin-top: 10px; color: rgba(255,255,255,0.7);"
+                            id="progressText">Uploading...</p>
+                    </div>
+                </form>
+            </div>
+
+            <div class="investor-list">
+                <h3>Uploaded Documents</h3>
+                <div id="documentsListContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading documents...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+    <script src="admin-portal.js"></script>
+</body>
+
+</html>

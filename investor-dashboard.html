@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Investor Dashboard - Blackpine Capital</title>
+    <link rel="icon" href="Azalea.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="investor-portal.css">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <div>
+                <h1>Welcome, <span id="investorName">Investor</span></h1>
+                <p>Blackpine Capital Investor Portal</p>
+            </div>
+            <button class="logout-btn" id="logoutBtn">Sign Out</button>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Messages Section -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>Messages</h2>
+                    <span class="card-badge" id="messageCount">0</span>
+                </div>
+                <div id="messagesContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading messages...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Documents Section -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2>Documents</h2>
+                    <span class="card-badge" id="documentCount">0</span>
+                </div>
+                <div id="documentsContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading documents...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+
+    <!-- Firebase Config -->
+    <script src="firebase-config.js"></script>
+
+    <script>
+        let currentUser = null;
+
+        // Check authentication
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'investor-login.html';
+                return;
+            }
+
+            currentUser = user;
+            await loadDashboard();
+        });
+
+        // Load dashboard data
+        async function loadDashboard() {
+            try {
+                // Get investor info
+                const investorDoc = await db.collection('investors').doc(currentUser.uid).get();
+                if (investorDoc.exists) {
+                    const investorData = investorDoc.data();
+                    document.getElementById('investorName').textContent = investorData.name || currentUser.email;
+                }
+
+                // Load messages
+                loadMessages();
+
+                // Load documents
+                loadDocuments();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Load messages
+        function loadMessages() {
+            const messagesContainer = document.getElementById('messagesContainer');
+
+            db.collection('messages')
+                .where('recipientId', 'in', [currentUser.uid, 'all'])
+                .orderBy('sentAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    if (snapshot.empty) {
+                        messagesContainer.innerHTML = `
+                            <div class="empty-state">
+                                <p>No messages yet</p>
+                            </div>
+                        `;
+                        document.getElementById('messageCount').textContent = '0';
+                        return;
+                    }
+
+                    let messagesHTML = '';
+                    snapshot.forEach((doc) => {
+                        const message = doc.data();
+                        const isUnread = !message.readAt;
+                        const date = message.sentAt ? message.sentAt.toDate().toLocaleDateString() : 'Recent';
+
+                        messagesHTML += `
+                            <div class="message-item ${isUnread ? 'unread' : ''}" data-id="${doc.id}">
+                                <div class="message-header">
+                                    <div class="message-subject">${message.subject}</div>
+                                    <div class="message-date">${date}</div>
+                                </div>
+                                <div class="message-body">${message.body}</div>
+                            </div>
+                        `;
+
+                        // Mark as read when viewed
+                        if (isUnread) {
+                            db.collection('messages').doc(doc.id).update({
+                                readAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        }
+                    });
+
+                    messagesContainer.innerHTML = messagesHTML;
+                    document.getElementById('messageCount').textContent = snapshot.size;
+                }, (error) => {
+                    console.error('Error loading messages:', error);
+                    messagesContainer.innerHTML = `
+                        <div class="empty-state">
+                            <p>Error loading messages</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // Load documents
+        function loadDocuments() {
+            const documentsContainer = document.getElementById('documentsContainer');
+
+            db.collection('documents')
+                .where('recipientId', 'in', [currentUser.uid, 'all'])
+                .orderBy('uploadedAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    if (snapshot.empty) {
+                        documentsContainer.innerHTML = `
+                            <div class="empty-state">
+                                <p>No documents available</p>
+                            </div>
+                        `;
+                        document.getElementById('documentCount').textContent = '0';
+                        return;
+                    }
+
+                    let documentsHTML = '';
+                    snapshot.forEach((doc) => {
+                        const document = doc.data();
+                        const date = document.uploadedAt ? document.uploadedAt.toDate().toLocaleDateString() : 'Recent';
+                        const fileSize = formatFileSize(document.fileSize);
+
+                        documentsHTML += `
+                            <div class="document-item">
+                                <div class="document-header">
+                                    <div class="document-name">${document.name}</div>
+                                    <div class="document-date">${date}</div>
+                                </div>
+                                <div class="document-info">
+                                    <span class="document-category">${formatCategory(document.category)}</span>
+                                    <span>${fileSize}</span>
+                                </div>
+                                <a href="#" class="download-btn" onclick="downloadDocument('${doc.id}', '${document.storageUrl}', '${document.name}'); return false;">
+                                    Download
+                                </a>
+                            </div>
+                        `;
+                    });
+
+                    documentsContainer.innerHTML = documentsHTML;
+                    document.getElementById('documentCount').textContent = snapshot.size;
+                }, (error) => {
+                    console.error('Error loading documents:', error);
+                    documentsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <p>Error loading documents</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // Download document
+        async function downloadDocument(docId, storageUrl, fileName) {
+            try {
+                const storageRef = storage.refFromURL(storageUrl);
+                const downloadUrl = await storageRef.getDownloadURL();
+
+                // Create temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = fileName;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                console.error('Error downloading document:', error);
+                alert('Failed to download document. Please try again.');
+            }
+        }
+
+        // Format file size
+        function formatFileSize(bytes) {
+            if (!bytes) return 'Unknown size';
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Format category
+        function formatCategory(category) {
+            const categories = {
+                'tax-forms': 'Tax Forms',
+                'financial-statements': 'Financial Statements',
+                'other': 'Other'
+            };
+            return categories[category] || category;
+        }
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try {
+                await auth.signOut();
+                window.location.href = 'investor-login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Failed to sign out. Please try again.');
+            }
+        });
+    </script>
+</body>
+
+</html>
