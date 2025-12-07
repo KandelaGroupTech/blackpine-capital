@@ -7,44 +7,467 @@
     <title>Investor Dashboard - Blackpine Capital</title>
     <link rel="icon" href="Azalea.png" type="image/x-icon">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="investor-portal.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #1a1f3a 0%, #2d3561 100%);
+            min-height: 100vh;
+            color: #ffffff;
+        }
+
+        .dashboard-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 30px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 18px;
+            color: #4fd1c5;
+            margin-bottom: 5px;
+        }
+
+        .sidebar-header p {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: rgba(79, 209, 197, 0.1);
+            color: #4fd1c5;
+        }
+
+        .nav-item.active {
+            background: rgba(79, 209, 197, 0.15);
+            border-left-color: #4fd1c5;
+            color: #4fd1c5;
+        }
+
+        .nav-item .badge {
+            margin-left: auto;
+            background: #4fd1c5;
+            color: #1a1f3a;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .top-bar {
+            padding: 25px 40px;
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .welcome-section h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+
+        .welcome-section p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+        }
+
+        .top-bar-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-primary {
+            background: #4fd1c5;
+            color: #1a1f3a;
+        }
+
+        .btn-primary:hover {
+            background: #45b8ad;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 209, 197, 0.3);
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Messages */
+        .message-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .message-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(79, 209, 197, 0.3);
+        }
+
+        .message-item.unread {
+            border-left: 4px solid #4fd1c5;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .message-subject {
+            font-weight: 600;
+            font-size: 16px;
+            color: #ffffff;
+        }
+
+        .message-date {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 13px;
+        }
+
+        .message-body {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        /* Documents */
+        .document-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .document-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(79, 209, 197, 0.3);
+        }
+
+        .document-info-section {
+            flex: 1;
+        }
+
+        .document-name {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .document-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .document-category {
+            background: rgba(79, 209, 197, 0.2);
+            color: #4fd1c5;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .download-btn {
+            background: #4fd1c5;
+            color: #1a1f3a;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .download-btn:hover {
+            background: #45b8ad;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 209, 197, 0.3);
+        }
+
+        /* FAQ */
+        .faq-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .faq-question {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #4fd1c5;
+        }
+
+        .faq-answer {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .empty-state p {
+            font-size: 16px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #4fd1c5;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .section-title {
+            font-size: 24px;
+            margin-bottom: 25px;
+            color: #ffffff;
+        }
+
+        /* Scrollbar */
+        .content-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .content-area::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .content-area::-webkit-scrollbar-thumb {
+            background: rgba(79, 209, 197, 0.3);
+            border-radius: 4px;
+        }
+
+        .content-area::-webkit-scrollbar-thumb:hover {
+            background: rgba(79, 209, 197, 0.5);
+        }
+    </style>
 </head>
 
 <body>
     <div class="dashboard-container">
-        <div class="dashboard-header">
-            <div>
-                <h1>Welcome, <span id="investorName">Investor</span></h1>
-                <p>Blackpine Capital Investor Portal</p>
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Blackpine Capital</h2>
+                <p>Investor Portal</p>
             </div>
-            <button class="logout-btn" id="logoutBtn">Sign Out</button>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-tab="messages">
+                    <span>📨 Messages</span>
+                    <span class="badge" id="messageBadge">0</span>
+                </div>
+                <div class="nav-item" data-tab="documents">
+                    <span>📄 Documents</span>
+                    <span class="badge" id="documentBadge">0</span>
+                </div>
+                <div class="nav-item" data-tab="faq">
+                    <span>❓ FAQ</span>
+                </div>
+                <div class="nav-item" data-tab="reference">
+                    <span>📚 Reference Files</span>
+                </div>
+            </nav>
         </div>
 
-        <div class="dashboard-grid">
-            <!-- Messages Section -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h2>Messages</h2>
-                    <span class="card-badge" id="messageCount">0</span>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="top-bar">
+                <div class="welcome-section">
+                    <h1>Welcome, <span id="investorName">Investor</span></h1>
+                    <p>Manage your investments and stay updated</p>
                 </div>
-                <div id="messagesContainer">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Loading messages...</p>
-                    </div>
+                <div class="top-bar-actions">
+                    <button class="btn btn-secondary" id="resetPasswordBtn">Reset Password</button>
+                    <button class="btn btn-primary" id="logoutBtn">Sign Out</button>
                 </div>
             </div>
 
-            <!-- Documents Section -->
-            <div class="dashboard-card">
-                <div class="card-header">
-                    <h2>Documents</h2>
-                    <span class="card-badge" id="documentCount">0</span>
+            <div class="content-area">
+                <!-- Messages Tab -->
+                <div class="tab-content active" id="messagesTab">
+                    <h2 class="section-title">Messages</h2>
+                    <div id="messagesContainer">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading messages...</p>
+                        </div>
+                    </div>
                 </div>
-                <div id="documentsContainer">
-                    <div class="loading">
-                        <div class="spinner"></div>
-                        <p>Loading documents...</p>
+
+                <!-- Documents Tab -->
+                <div class="tab-content" id="documentsTab">
+                    <h2 class="section-title">Documents</h2>
+                    <div id="documentsContainer">
+                        <div class="loading">
+                            <div class="spinner"></div>
+                            <p>Loading documents...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Tab -->
+                <div class="tab-content" id="faqTab">
+                    <h2 class="section-title">Frequently Asked Questions</h2>
+                    <div id="faqContainer">
+                        <div class="faq-item">
+                            <div class="faq-question">How do I reset my password?</div>
+                            <div class="faq-answer">Click the "Reset Password" button in the top right corner. You'll
+                                receive an email with instructions to create a new password.</div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">How do I download documents?</div>
+                            <div class="faq-answer">Navigate to the Documents tab and click the "Download" button next
+                                to any document you wish to save to your device.</div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">When will I receive tax documents?</div>
+                            <div class="faq-answer">Tax documents (K-1 forms) are typically available by March 15th each
+                                year. You'll receive a notification when they're ready to download.</div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">Who do I contact for questions?</div>
+                            <div class="faq-answer">For any questions or concerns, please reply to any message in your
+                                Messages tab, or contact us directly at info@theblackpinegroup.com.</div>
+                        </div>
+                        <div class="faq-item">
+                            <div class="faq-question">How often are financial statements updated?</div>
+                            <div class="faq-answer">Financial statements are updated quarterly and will be available in
+                                the Documents section within 45 days of quarter end.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reference Files Tab -->
+                <div class="tab-content" id="referenceTab">
+                    <h2 class="section-title">Reference Files</h2>
+                    <div id="referenceContainer">
+                        <div class="empty-state">
+                            <p>Reference files will be available here soon.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -81,7 +504,10 @@
                 const investorDoc = await db.collection('investors').doc(currentUser.uid).get();
                 if (investorDoc.exists) {
                     const investorData = investorDoc.data();
-                    document.getElementById('investorName').textContent = investorData.name || currentUser.email;
+                    const fullName = investorData.name || currentUser.email;
+                    // Extract first name (everything before the first space)
+                    const firstName = fullName.split(' ')[0];
+                    document.getElementById('investorName').textContent = firstName;
                 }
 
                 // Load messages
@@ -94,13 +520,27 @@
             }
         }
 
+        // Tab switching
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const tabName = item.dataset.tab;
+
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+
+                // Update active tab content
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                document.getElementById(tabName + 'Tab').classList.add('active');
+            });
+        });
+
         // Load messages
         function loadMessages() {
             const messagesContainer = document.getElementById('messagesContainer');
 
             db.collection('messages')
                 .where('recipientId', 'in', [currentUser.uid, 'all'])
-                .orderBy('sentAt', 'desc')
                 .onSnapshot((snapshot) => {
                     if (snapshot.empty) {
                         messagesContainer.innerHTML = `
@@ -108,18 +548,28 @@
                                 <p>No messages yet</p>
                             </div>
                         `;
-                        document.getElementById('messageCount').textContent = '0';
+                        document.getElementById('messageBadge').textContent = '0';
                         return;
                     }
 
-                    let messagesHTML = '';
+                    // Sort messages by date manually since we can't use orderBy with where...in
+                    const messages = [];
                     snapshot.forEach((doc) => {
-                        const message = doc.data();
+                        messages.push({ id: doc.id, ...doc.data() });
+                    });
+                    messages.sort((a, b) => {
+                        const aTime = a.sentAt ? a.sentAt.toMillis() : 0;
+                        const bTime = b.sentAt ? b.sentAt.toMillis() : 0;
+                        return bTime - aTime; // Descending order
+                    });
+
+                    let messagesHTML = '';
+                    messages.forEach((message) => {
                         const isUnread = !message.readAt;
                         const date = message.sentAt ? message.sentAt.toDate().toLocaleDateString() : 'Recent';
 
                         messagesHTML += `
-                            <div class="message-item ${isUnread ? 'unread' : ''}" data-id="${doc.id}">
+                            <div class="message-item ${isUnread ? 'unread' : ''}" data-id="${message.id}">
                                 <div class="message-header">
                                     <div class="message-subject">${message.subject}</div>
                                     <div class="message-date">${date}</div>
@@ -130,14 +580,14 @@
 
                         // Mark as read when viewed
                         if (isUnread) {
-                            db.collection('messages').doc(doc.id).update({
+                            db.collection('messages').doc(message.id).update({
                                 readAt: firebase.firestore.FieldValue.serverTimestamp()
                             });
                         }
                     });
 
                     messagesContainer.innerHTML = messagesHTML;
-                    document.getElementById('messageCount').textContent = snapshot.size;
+                    document.getElementById('messageBadge').textContent = messages.length;
                 }, (error) => {
                     console.error('Error loading messages:', error);
                     messagesContainer.innerHTML = `
@@ -154,7 +604,6 @@
 
             db.collection('documents')
                 .where('recipientId', 'in', [currentUser.uid, 'all'])
-                .orderBy('uploadedAt', 'desc')
                 .onSnapshot((snapshot) => {
                     if (snapshot.empty) {
                         documentsContainer.innerHTML = `
@@ -162,27 +611,37 @@
                                 <p>No documents available</p>
                             </div>
                         `;
-                        document.getElementById('documentCount').textContent = '0';
+                        document.getElementById('documentBadge').textContent = '0';
                         return;
                     }
 
-                    let documentsHTML = '';
+                    // Sort documents by date manually
+                    const documents = [];
                     snapshot.forEach((doc) => {
-                        const document = doc.data();
+                        documents.push({ id: doc.id, ...doc.data() });
+                    });
+                    documents.sort((a, b) => {
+                        const aTime = a.uploadedAt ? a.uploadedAt.toMillis() : 0;
+                        const bTime = b.uploadedAt ? b.uploadedAt.toMillis() : 0;
+                        return bTime - aTime; // Descending order
+                    });
+
+                    let documentsHTML = '';
+                    documents.forEach((document) => {
                         const date = document.uploadedAt ? document.uploadedAt.toDate().toLocaleDateString() : 'Recent';
                         const fileSize = formatFileSize(document.fileSize);
 
                         documentsHTML += `
                             <div class="document-item">
-                                <div class="document-header">
+                                <div class="document-info-section">
                                     <div class="document-name">${document.name}</div>
-                                    <div class="document-date">${date}</div>
+                                    <div class="document-meta">
+                                        <span class="document-category">${formatCategory(document.category)}</span>
+                                        <span>${fileSize}</span>
+                                        <span>${date}</span>
+                                    </div>
                                 </div>
-                                <div class="document-info">
-                                    <span class="document-category">${formatCategory(document.category)}</span>
-                                    <span>${fileSize}</span>
-                                </div>
-                                <a href="#" class="download-btn" onclick="downloadDocument('${doc.id}', '${document.storageUrl}', '${document.name}'); return false;">
+                                <a href="#" class="download-btn" onclick="downloadDocument('${document.id}', '${document.storageUrl}', '${document.name}'); return false;">
                                     Download
                                 </a>
                             </div>
@@ -190,7 +649,7 @@
                     });
 
                     documentsContainer.innerHTML = documentsHTML;
-                    document.getElementById('documentCount').textContent = snapshot.size;
+                    document.getElementById('documentBadge').textContent = documents.length;
                 }, (error) => {
                     console.error('Error loading documents:', error);
                     documentsContainer.innerHTML = `
@@ -238,6 +697,19 @@
             };
             return categories[category] || category;
         }
+
+        // Reset password
+        document.getElementById('resetPasswordBtn').addEventListener('click', async () => {
+            if (confirm('Send password reset email to ' + currentUser.email + '?')) {
+                try {
+                    await auth.sendPasswordResetEmail(currentUser.email);
+                    alert('Password reset email sent! Please check your inbox.');
+                } catch (error) {
+                    console.error('Error sending password reset:', error);
+                    alert('Failed to send password reset email. Please try again.');
+                }
+            }
+        });
 
         // Logout
         document.getElementById('logoutBtn').addEventListener('click', async () => {

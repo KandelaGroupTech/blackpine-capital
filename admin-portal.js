@@ -135,15 +135,33 @@ document.getElementById('addInvestorForm').addEventListener('submit', async (e) 
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             lastLogin: null
         });
+        // Send welcome message to investor
+        await db.collection('messages').add({
+            recipientId: newUser.uid,
+            subject: 'Welcome to Blackpine Capital Investor Portal',
+            body: `Dear ${name},\n\nWelcome to the Blackpine Capital Investor Portal! Your account has been created successfully.\n\nYou can now log in to access:\n• Important messages and updates\n• Tax forms and financial statements\n• Quarterly reports and documents\n\nYour login email: ${email}\n\nFor security, we recommend changing your password after your first login. You can do this by clicking "Forgot Password" on the login page.\n\nIf you have any questions, please don't hesitate to reach out.\n\nBest regards,\nBlackpine Capital Team`,
+            sentAt: firebase.firestore.FieldValue.serverTimestamp(),
+            sentBy: currentUser.uid,
+            readAt: null
+        });
+        // Send password reset email so they can set their own password
+        try {
+            await auth.sendPasswordResetEmail(email);
 
-        // Sign out the new user and sign back in as admin
-        await auth.updateCurrentUser(currentUser);
+            // Option B: Sign out admin to prevent session conflicts
+            await auth.signOut();
+            alert(`Investor ${name} added successfully!\n\nA welcome email with password reset instructions has been sent to ${email}.\n\nTemporary Password: ${password}\n\nThe investor can either:\n1. Use the temporary password to log in immediately\n2. Click the password reset link in their email to set a new password\n\nA welcome message has also been added to their dashboard.\n\nYou have been logged out for security. Please log back in.`);
+            window.location.href = 'admin-login.html';
+        } catch (emailError) {
+            console.error('Error sending password reset email:', emailError);
 
-        alert(`Investor ${name} added successfully!\n\nLogin credentials:\nEmail: ${email}\nPassword: ${password}\n\nPlease share these credentials with the investor.`);
+            // Option B: Sign out admin to prevent session conflicts
+            await auth.signOut();
+            alert(`Investor ${name} added successfully!\n\nNote: Could not send password reset email. Please share these credentials manually:\n\nEmail: ${email}\nTemporary Password: ${password}\n\nA welcome message has been added to their dashboard.\n\nYou have been logged out for security. Please log back in.`);
+            window.location.href = 'admin-login.html';
+        }
 
-        document.getElementById('addInvestorForm').reset();
-        // Generate new random password for next investor
-        document.getElementById('investorPassword').value = generatePassword();
+        // Form reset and password generation removed - page will redirect to login
     } catch (error) {
         console.error('Error adding investor:', error);
         let errorMsg = 'Failed to add investor. ';
@@ -214,22 +232,54 @@ document.getElementById('sendMessageForm').addEventListener('submit', async (e) 
     const recipient = document.getElementById('messageRecipient').value;
     const subject = document.getElementById('messageSubject').value;
     const body = document.getElementById('messageBody').value;
+    const attachmentInput = document.getElementById('messageAttachment');
+    const attachmentFile = attachmentInput.files[0];
 
     btn.disabled = true;
     btn.textContent = 'Sending...';
 
     try {
-        await db.collection('messages').add({
+        let attachmentUrl = null;
+        let attachmentName = null;
+        let attachmentSize = null;
+
+        // Upload attachment if present
+        if (attachmentFile) {
+            btn.textContent = 'Uploading attachment...';
+            const timestamp = Date.now();
+            const filename = `${timestamp}_${attachmentFile.name}`;
+            const storageRef = storage.ref(`message-attachments/${filename}`);
+
+            await storageRef.put(attachmentFile);
+            attachmentUrl = await storageRef.getDownloadURL();
+            attachmentName = attachmentFile.name;
+            attachmentSize = attachmentFile.size;
+        }
+
+        btn.textContent = 'Sending message...';
+
+        // Create message with optional attachment
+        const messageData = {
             recipientId: recipient,
             subject: subject,
             body: body,
             sentAt: firebase.firestore.FieldValue.serverTimestamp(),
             sentBy: currentUser.uid,
             readAt: null
-        });
+        };
+
+        // Add attachment data if present
+        if (attachmentUrl) {
+            messageData.attachmentUrl = attachmentUrl;
+            messageData.attachmentName = attachmentName;
+            messageData.attachmentSize = attachmentSize;
+        }
+
+        await db.collection('messages').add(messageData);
 
         alert('Message sent successfully!');
         document.getElementById('sendMessageForm').reset();
+        document.getElementById('messageFileInfo').style.display = 'none';
     } catch (error) {
         console.error('Error sending message:', error);
         alert('Failed to send message. Please try again.');
@@ -460,6 +510,47 @@ function formatCategory(category) {
         'other': 'Other'
     };
     return categories[category] || category;
+}
+
+// Setup message attachment file upload
+const messageUploadArea = document.getElementById('messageFileUploadArea');
+const messageFileInput = document.getElementById('messageAttachment');
+const messageFileInfo = document.getElementById('messageFileInfo');
+
+if (messageUploadArea && messageFileInput) {
+    messageUploadArea.addEventListener('click', () => messageFileInput.click());
+
+    messageFileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const size = formatFileSize(file.size);
+            messageFileInfo.innerHTML = `Selected: <strong>${file.name}</strong> (${size})`;
+            messageFileInfo.style.display = 'block';
+        }
+    });
+
+    // Drag and drop
+    messageUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        messageUploadArea.classList.add('dragover');
+    });
+
+    messageUploadArea.addEventListener('dragleave', () => {
+        messageUploadArea.classList.remove('dragover');
+    });
+
+    messageUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        messageUploadArea.classList.remove('dragover');
+
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            messageFileInput.files = e.dataTransfer.files;
+            const size = formatFileSize(file.size);
+            messageFileInfo.innerHTML = `Selected: <strong>${file.name}</strong> (${size})`;
+            messageFileInfo.style.display = 'block';
+        }
+    });
 }
 
 // Logout
