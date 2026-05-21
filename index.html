@@ -59,6 +59,9 @@
 </head>
 
 <body>
+    <!-- Canvas Background -->
+    <canvas id="bg-canvas"></canvas>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="container">
@@ -99,7 +102,7 @@
     </section>
 
     <!-- About Section -->
-    <section class="about">
+    <section class="about animate-on-scroll">
         <div class="container">
             <h2>ABOUT US</h2>
             <p>Blackpine Capital is a strategic partner focused on acquiring and building leading healthcare and
@@ -115,7 +118,7 @@
     </section>
 
     <!-- Investment Info Section -->
-    <section class="investment-info">
+    <section class="investment-info animate-on-scroll">
         <div class="container">
             <div class="two-columns">
                 <div class="column" id="investment-criteria">
@@ -139,7 +142,7 @@
     </section>
 
     <!-- Team Section -->
-    <section id="team" class="team">
+    <section id="team" class="team animate-on-scroll">
         <div class="container">
             <h2>OUR TEAM</h2>
 
@@ -170,7 +173,7 @@
     </section>
 
     <!-- Contact Section -->
-    <section id="contact" class="contact">
+    <section id="contact" class="contact animate-on-scroll">
         <div class="container">
             <h2>Contact Us</h2>
             <form class="contact-form">
@@ -206,6 +209,7 @@
     </footer>
 
     <script src="script.js"></script>
+    <script src="background.js"></script>
     <script>
         // --- Animated Text Effect ---
         document.addEventListener('DOMContentLoaded', function () {

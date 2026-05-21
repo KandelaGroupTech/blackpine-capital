@@ -57,11 +57,11 @@ window.addEventListener('scroll', function() {
     const navbar = document.querySelector('.navbar');
     
     if (window.scrollY > 50) {
-        navbar.style.backgroundColor = '#fff';
-        navbar.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+        navbar.style.backgroundColor = '#111'; // Darker on scroll
+        navbar.style.boxShadow = '0 2px 10px rgba(0,0,0,0.5)';
     } else {
-        navbar.style.backgroundColor = '#fff';
-        navbar.style.boxShadow = '0 2px 4px rgba(0,0,0,0.1)';
+        navbar.style.backgroundColor = '#222'; // Default black
+        navbar.style.boxShadow = '0 2px 4px rgba(0,0,0,0.3)';
     }
 });
 
@@ -85,9 +85,43 @@ window.addEventListener('scroll', function() {
     });
     
     navLinks.forEach(link => {
-        link.style.color = '#555';
+        link.style.color = '#ccc';
         if (link.getAttribute('href').slice(1) === current) {
-            link.style.color = '#222';
+            link.style.color = '#fff';
         }
     });
+});
+
+// ========================================
+// Scroll Animations (Intersection Observer)
+// ========================================
+document.addEventListener('DOMContentLoaded', function() {
+    const animatedElements = document.querySelectorAll('.animate-on-scroll');
+    
+    if ('IntersectionObserver' in window) {
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.15
+        };
+        
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('is-visible');
+                    // Optional: stop observing once animated
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        animatedElements.forEach(el => {
+            observer.observe(el);
+        });
+    } else {
+        // Fallback for older browsers
+        animatedElements.forEach(el => {
+            el.classList.add('is-visible');
+        });
+    }
 });
